@@ -1,18 +1,25 @@
 import requests
 from bs4 import BeautifulSoup
-# list of 3-letter words
-WORD_URL = "https://scrabble.collinsdictionary.com/word-lists/three-letter-words-in-scrabble/"
-WORD_FILE = "./words-3.txt"
+
+# only 2, 3, 4, and 5 work
+numberWords = ['zero', 'one', 'two', 'three', 'four', 'five']
+
+N = 5 # length of words
+
+# list of n-letter words
+WORD_URL = f"https://scrabble.collinsdictionary.com/word-lists/{numberWords[N]}-letter-words-in-scrabble/"
+WORD_FILE = f"./words-{N}.txt"
 
 page = requests.get(WORD_URL)
 soup = BeautifulSoup(page.content, "html.parser")
-letter_tables = soup.find_all('ul', class_="letter-table")
+#letter_tables = soup.find_all('ul', class_="letter-table")
+letter_tables = soup.find_all('div', class_="letter-table")
 words = []
 for table in letter_tables:
   for word in table:
     if not word:
       continue
-    strippedWord = word.strip()
+    strippedWord = word.get_text().strip()
     if strippedWord:
       words.append(strippedWord)
 

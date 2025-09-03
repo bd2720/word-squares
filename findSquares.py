@@ -7,7 +7,8 @@
 
 from prefixTree import PrefixTree 
 
-WORD_FILE = "./words-3.txt"
+N = 3
+WORD_FILE = f"./words-{N}.txt"
 
 def readWords():
   words = []
@@ -67,6 +68,21 @@ def findSquares_prefixtree(words):
   # finally, return all the squares we found
   return squares
 
+# call with partialSquares = [[w] for w in words]
+def findSquares_prefixtree_r(ptree, depth, n, partialSquares):
+  if depth >= n:
+    return partialSquares
+  # for each partial square: calculate
+  newPartialSquares = []
+  for psquare in partialSquares:
+    # construct current prefix
+    prefix = [psquare[i][depth] for i in range(depth)]
+    # find list of words that begin with the prefix
+    candidateWords = ptree.startsWith(prefix)
+    # construct new partialSquares by pairing each candidate word with current partial square
+    newPartialSquares += [psquare + [cword] for cword in candidateWords]
+  return findSquares_prefixtree_r(ptree, depth+1, n, newPartialSquares)
+
 
 def formatSquare(wordSquare):
   s = ""
@@ -76,7 +92,10 @@ def formatSquare(wordSquare):
 
 
 words = readWords()
-pftree = PrefixTree(words, 3)
+pftree = PrefixTree(words, N)
+# find all symmetrical word squares of size N
+wordSquares = findSquares_prefixtree_r(pftree, 1, N, [[w] for w in words])
+print(f"{len(wordSquares)} word squares found!")
 
 #print(words)
 #squares = findSquares_unique_bf(limit=10)
