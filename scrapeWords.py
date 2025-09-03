@@ -13,10 +13,11 @@ WORD_FILE = f"./words-{N}.txt"
 page = requests.get(WORD_URL)
 soup = BeautifulSoup(page.content, "html.parser")
 #letter_tables = soup.find_all('ul', class_="letter-table")
-letter_tables = soup.find_all('div', class_="letter-table")
+letter_tables = soup.find_all(class_=["letter-table", "letter_table"])
 words = []
 for table in letter_tables:
-  for word in table:
+  word_elements = table.find_all('a')
+  for word in word_elements:
     if not word:
       continue
     strippedWord = word.get_text().strip()
@@ -28,4 +29,4 @@ with open(WORD_FILE, "w") as file:
   for word in words:
     file.write(word + "\n")
 
-print("Done!")
+print(f"Scraped {len(words)} {N}-letter words!")
