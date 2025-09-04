@@ -70,6 +70,7 @@ def findSquares_prefixtree(words):
 
 # call with partialSquares = [[w] for w in words]
 def findSquares_prefixtree_r(ptree, depth, n, partialSquares):
+  print(f"Depth: {depth}")
   if depth >= n:
     return partialSquares
   # for each partial square: calculate
