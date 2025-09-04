@@ -7,14 +7,15 @@
 
 from prefixTree import PrefixTree 
 
-N = 3
-WORD_FILE = f"./words-{N}.txt"
+N = 5
+IS_COMMON = True
+WORD_FILE = f"./words{'-common' if IS_COMMON else ''}-{N}.txt"
 
 def readWords():
   words = []
   with open(WORD_FILE, "r") as word_file:
     for line in word_file:
-      words.append(line.strip())
+      words.append(line.strip().upper())
   return words
 
 def findSquares_unique_bf(words, limit=100):
@@ -48,7 +49,7 @@ def findSquares_unique_bf(words, limit=100):
           #print(f"Found: {wordSquares[-1]}")
   return wordSquares
 
-def findSquares_prefixtree(words):
+def findSquares_prefixtree_3(words):
   squares = []
   # Choose words in columns, using prefix tree
   # 1. create prefix tree
@@ -71,7 +72,7 @@ def findSquares_prefixtree(words):
 # call with partialSquares = [[w] for w in words]
 def findSquares_prefixtree_r(ptree, depth, n, partialSquares):
   print(f"Depth: {depth}")
-  if depth >= n:
+  if depth >= n or not partialSquares:
     return partialSquares
   # for each partial square: calculate
   newPartialSquares = []
@@ -84,6 +85,28 @@ def findSquares_prefixtree_r(ptree, depth, n, partialSquares):
     newPartialSquares += [psquare + [cword] for cword in candidateWords]
   return findSquares_prefixtree_r(ptree, depth+1, n, newPartialSquares)
 
+# Find symmetrical word squares using a prefix tree (non-recursive)
+def findSquares_prefixtree(ptree, words, n):
+  # build squares starting with each word
+  partialSquares = [[w] for w in words]
+  # add on n-1 new words to each square, or remove it
+  for depth in range(1, n):
+    print(f"{len(partialSquares)} partial squares of length {depth}...")
+    if not partialSquares:
+      break
+    newPartialSquares = []
+    for psquare in partialSquares:
+      # construct current prefix
+      prefix = [psquare[i][depth] for i in range(depth)]
+      # find list of words that begin with the prefix
+      candidateWords = ptree.startsWith(prefix)
+      # construct new partialSquares by pairing each candidate word with current partial square
+      newPartialSquares += [psquare + [cword] for cword in candidateWords]
+    # overwrite old partialSquares with new ones
+    partialSquares = newPartialSquares
+  # return all squares found
+  return partialSquares
+
 
 def formatSquare(wordSquare):
   s = ""
@@ -95,11 +118,5 @@ def formatSquare(wordSquare):
 words = readWords()
 pftree = PrefixTree(words, N)
 # find all symmetrical word squares of size N
-wordSquares = findSquares_prefixtree_r(pftree, 1, N, [[w] for w in words])
+wordSquares = findSquares_prefixtree(pftree, words, N)
 print(f"{len(wordSquares)} word squares found!")
-
-#print(words)
-#squares = findSquares_unique_bf(limit=10)
-#for square in squares:
-#  print(formatSquare(square))
-#print(f"{len(squares)} unique squares were found.")
