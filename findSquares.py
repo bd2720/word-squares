@@ -7,9 +7,11 @@
 
 from prefixTree import PrefixTree 
 
-N = 5
-IS_COMMON = True
-WORD_FILE = f"./words{'-common' if IS_COMMON else ''}-{N}.txt"
+N = 6
+IS_COMMON = False
+DICTIONARY = 'webster'
+DIRECTORY = 'words'
+WORD_FILE = f"./{DIRECTORY}/words-{DICTIONARY}{'-common' if IS_COMMON else ''}-{N}.txt"
 
 def readWords():
   words = []
@@ -86,14 +88,18 @@ def findSquares_prefixtree_r(ptree, depth, n, partialSquares):
   return findSquares_prefixtree_r(ptree, depth+1, n, newPartialSquares)
 
 # Find symmetrical word squares using a prefix tree (non-recursive)
-def findSquares_prefixtree(ptree, words, n):
+def findSquares_prefixtree(ptree, words, n, startingSquares):
   # build squares starting with each word
-  partialSquares = [[w] for w in words]
+  partialSquares = startingSquares if startingSquares else [[w] for w in words] 
   # add on n-1 new words to each square, or remove it
   for depth in range(1, n):
     print(f"{len(partialSquares)} partial squares of length {depth}...")
     if not partialSquares:
       break
+    # Just for fun, see how close we got
+    if len(partialSquares) <= 10:
+      for psquare in partialSquares:
+        print(formatSquare(psquare))
     newPartialSquares = []
     for psquare in partialSquares:
       # construct current prefix
@@ -118,5 +124,6 @@ def formatSquare(wordSquare):
 words = readWords()
 pftree = PrefixTree(words, N)
 # find all symmetrical word squares of size N
-wordSquares = findSquares_prefixtree(pftree, words, N)
+#wordSquares = findSquares_prefixtree(pftree, words, N)
+wordSquares = findSquares_prefixtree(pftree, words, N, startingSquares=[[w] for w in words if w[0] == 'A'])
 print(f"{len(wordSquares)} word squares found!")
