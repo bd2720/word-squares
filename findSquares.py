@@ -8,11 +8,20 @@
 from prefixTree import PrefixTree 
 import sys
 
-DIRECTORY = 'words' # fixed directory name where word files are read from
+WORD_DIRECTORY = 'words' # fixed directory name where word files are read from
+SQUARE_DIRECTORY = 'squares' # fixed directory name where word squares files are saved to
 VALID_WORD_SETS = {"collins", "webster", "webster-common"}
 DEFAULT_WORD_SET = "webster-common"
 
 wordSquares = []
+
+# print the word square with the letters spaced out
+def formatSquare(wordSquare):
+  return "\n".join(" ".join(word) for word in wordSquare)
+
+# print multiple word squares, each separated by an empty line
+def formatSquares(wordSquares):
+  return "\n\n".join(formatSquare(sq) for sq in wordSquares)
 
 # read words in from the given filename, ensure uppercase
 def readWords(filename):
@@ -21,6 +30,11 @@ def readWords(filename):
     for line in word_file:
       words.append(line.strip().upper())
   return words
+
+# write squares to a file
+def writeSquares(filename, wordSquares):
+  with open(filename, "w") as square_file:
+    square_file.write(formatSquares(wordSquares))
 
 # Find symmetrical word squares using a prefix tree (non-recursive)
 def findSquares_prefixtree(ptree, words, n, startingSquares=None, shouldPrint=False):
@@ -62,20 +76,7 @@ def findSquares_prefixtree(ptree, words, n, startingSquares=None, shouldPrint=Fa
     # overwrite old partialSquares with new ones
     partialSquares = newPartialSquares
   # return all squares found
-  return partialSquares
-
-# optimized method for finding a single square
-def findSquare(ptree, words, n):
-  pass
-    
-
-# print the word square with the letters spaced out
-def formatSquare(wordSquare):
-  return "\n".join(" ".join(word) for word in wordSquare)
-
-# print multiple word squares, each separated by an empty line
-def formatSquares(wordSquares):
-  return "\n\n".join(formatSquare(sq) for sq in wordSquares)
+  return partialSquares 
 
 # Usage:
 #   $ python ./findSquares.py <WORD_SET> <N*> <STARTING_WORD>
@@ -97,7 +98,7 @@ def main():
     print("Error: N is invalid.")
     return
   # assemble word file name
-  WORD_FILE = f"./{DIRECTORY}/words-{WORD_SET}-{N}.txt"
+  WORD_FILE = f"./{WORD_DIRECTORY}/words-{WORD_SET}-{N}.txt"
   # read in list of N-length words
   try:
     words = readWords(WORD_FILE)
@@ -124,7 +125,15 @@ def main():
   pftree = PrefixTree(words, N)
   # find all symmetrical word squares of size N
   global wordSquares
-  wordSquares = findSquares_prefixtree(pftree, words, N, startingSquares=([[STARTING_WORD]] if STARTING_WORD else None), shouldPrint=True)
+  wordSquares = []
+  wordsToSearch = [STARTING_WORD] if STARTING_WORD else words
+  for i, word in enumerate(wordsToSearch):
+    print(f"{word} ({i+1} / {len(wordsToSearch)}) [{len(wordSquares)} Found So Far]")
+    newSquares = findSquares_prefixtree(pftree, words, N, startingSquares=[[word]])
+    if newSquares:
+      print("!!! FOUND WORD SQUARES !!!")
+      #print((formatSquares(newSquares)))
+      wordSquares += newSquares
   # print size of results
   print(f"{len(wordSquares)} word squares of size {N} found" + (f" starting with {STARTING_WORD}!" if STARTING_WORD else "!"))
 

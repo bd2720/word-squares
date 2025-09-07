@@ -4,3 +4,5 @@ __pycache__
 # Generated word files
 /words
 words*.txt
+/squares
+squares*.txt
