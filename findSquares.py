@@ -10,8 +10,8 @@ import sys
 
 WORD_DIRECTORY = 'words' # fixed directory name where word files are read from
 SQUARE_DIRECTORY = 'squares' # fixed directory name where word squares files are saved to
-VALID_WORD_SETS = {"collins", "webster", "webster-common"}
-DEFAULT_WORD_SET = "webster-common"
+VALID_WORD_SETS = {"collins", "webster", "webstercommon"}
+DEFAULT_WORD_SET = "webstercommon"
 
 wordSquares = []
 

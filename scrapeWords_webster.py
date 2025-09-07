@@ -41,7 +41,7 @@ print('Done processing! Printing to files...')
 # Done processing, now write each to a file
 for length in wordsByLength.keys():
   words = wordsByLength[length]
-  with open(f"./{DIRECTORY}/words-webster{'-common' if IS_COMMON else ''}-{length}.txt", "w") as file:
+  with open(f"./{DIRECTORY}/words-webster{'common' if IS_COMMON else ''}-{length}.txt", "w") as file:
     for word in words:
       file.write(word + "\n")
 print('Done!')
