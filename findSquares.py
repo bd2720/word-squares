@@ -12,6 +12,8 @@ DIRECTORY = 'words' # fixed directory name where word files are read from
 VALID_WORD_SETS = {"collins", "webster", "webster-common"}
 DEFAULT_WORD_SET = "webster-common"
 
+wordSquares = []
+
 # read words in from the given filename, ensure uppercase
 def readWords(filename):
   words = []
@@ -32,8 +34,7 @@ def findSquares_prefixtree(ptree, words, n, startingSquares=None, shouldPrint=Fa
       break
     # Just for fun, see how close we got
     if shouldPrint and len(partialSquares) <= 10:
-      for psquare in partialSquares:
-        print(formatSquare(psquare))
+      print(formatSquares(partialSquares))
     newPartialSquares = []
     for psquare in partialSquares:
       # construct current prefix
@@ -41,15 +42,40 @@ def findSquares_prefixtree(ptree, words, n, startingSquares=None, shouldPrint=Fa
       # find list of words that begin with the prefix
       candidateWords = ptree.startsWith(prefix)
       # construct new partialSquares by pairing each candidate word with current partial square
-      newPartialSquares += [psquare + [cword] for cword in candidateWords]
+      # without pruning, this is simply: newPartialSquares += [psquare + [cword] for cword in candidateWords]
+      for cword in candidateWords:
+        # attempt to prune this entry by ensuring that words exist for each partial column
+        shouldPrune = False
+        for i in range(depth+1, n):
+          # construct partial column
+          pcol = [psquare[j][i] for j in range(depth)]
+          # add letter from candidate word
+          pcol.append(cword[i])
+          # prune candidate word if no words exist starting with this partial column
+          if not ptree.hasWordStartingWith(pcol):
+            shouldPrune = True
+            break
+        if not shouldPrune:
+        # add new partial square to the list if not already pruned
+          newPartialSquares.append(psquare + [cword])
+      
     # overwrite old partialSquares with new ones
     partialSquares = newPartialSquares
   # return all squares found
   return partialSquares
 
+# optimized method for finding a single square
+def findSquare(ptree, words, n):
+  pass
+    
+
 # print the word square with the letters spaced out
 def formatSquare(wordSquare):
   return "\n".join(" ".join(word) for word in wordSquare)
+
+# print multiple word squares, each separated by an empty line
+def formatSquares(wordSquares):
+  return "\n\n".join(formatSquare(sq) for sq in wordSquares)
 
 # Usage:
 #   $ python ./findSquares.py <WORD_SET> <N*> <STARTING_WORD>
@@ -73,7 +99,11 @@ def main():
   # assemble word file name
   WORD_FILE = f"./{DIRECTORY}/words-{WORD_SET}-{N}.txt"
   # read in list of N-length words
-  words = readWords(WORD_FILE)
+  try:
+    words = readWords(WORD_FILE)
+  except:
+    print("Error: Word file does not exist.")
+    return
   if not words:
     print("Error: Words were not read successfully.")
     return
@@ -93,6 +123,7 @@ def main():
   # assemble PrefixTree
   pftree = PrefixTree(words, N)
   # find all symmetrical word squares of size N
+  global wordSquares
   wordSquares = findSquares_prefixtree(pftree, words, N, startingSquares=([[STARTING_WORD]] if STARTING_WORD else None), shouldPrint=True)
   # print size of results
   print(f"{len(wordSquares)} word squares of size {N} found" + (f" starting with {STARTING_WORD}!" if STARTING_WORD else "!"))

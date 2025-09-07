@@ -71,3 +71,12 @@ class PrefixTree:
         return []
     # construct the list of words inside PrefixNode
     return ["".join(letters[:-1]) + partialWord for partialWord in currNode.getWords(self.n)]
+  
+  # returns True if at least one word exists with the given letter sequence
+  def hasWordStartingWith(self, letters):
+    currNode = self.tree
+    for letter in letters:
+      currNode = currNode.getChild(letter)
+      if not currNode:
+        return False
+    return True
